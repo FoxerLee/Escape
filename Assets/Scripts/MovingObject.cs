@@ -16,6 +16,8 @@ public abstract class MovingObject : MonoBehaviour
         T hitComponent = hit.transform.GetComponent<T>();
         if (!canMove && hitComponent != null)
             OnCantMove(hitComponent);
+        
+        // GameController.instance.playerTurn = true;
     }
 
     public LayerMask blockingLayer;
@@ -27,6 +29,7 @@ public abstract class MovingObject : MonoBehaviour
 
     protected virtual void Start() {
         boxCollider2D = GetComponent<BoxCollider2D>();
+        rb2D = GetComponent<Rigidbody2D>();
         inverseMoveTime = 1f / moveTime;
     }
 
@@ -39,6 +42,7 @@ public abstract class MovingObject : MonoBehaviour
             sqrtRemainDistance = (transform.position - end).sqrMagnitude;
             yield return null;
         }
+        // GameController.instance.playerTurn = true;
     }
 
     protected abstract void OnCantMove <T> (T component)
