@@ -7,6 +7,7 @@ public class GameController : MonoBehaviour
 
     public static GameController instance = null;
     public int playerFoodPoints = 100;
+    public int playerSanPoints = 100;
     [HideInInspector] public bool playerTurn = true;
     public float turnDelay = 0.1f;
 
