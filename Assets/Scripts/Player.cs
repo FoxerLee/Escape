@@ -9,21 +9,34 @@ public class Player : MovingObject
     public int wallDamage = 1;
     public int pointsPerFood = 10;
     public int pointsPerSoda = 20;
+    public int sanityUpdateTime = 2;
+    public Vector3 uiStartPosition;
+    public Vector3 uiEndPosition;
+    public Transform bloodMask;
+    public Transform sanMask;
     public float restartLevelDelay = 1f;
 
     Animator animator;
+    bool isInLightArea = true;
+    float totalUILength;
     int food;
+    int san;
 
     protected override void Start()
     {
         animator = GetComponent<Animator>();
         food = GameController.instance.playerFoodPoints;
+        san = GameController.instance.playerSanPoints;
+        totalUILength = uiStartPosition.x - uiEndPosition.x;
         base.Start();
+        UpdateBlood();
+        StartCoroutine(SanCheck());
     }
 
     protected override void AttempMove<T> (int xDir, int yDir)
     {
         food--;
+        UpdateBlood();
         base.AttempMove<T>(xDir, yDir);
         CheckIfGameOver();
         GameController.instance.playerTurn = false;
@@ -31,6 +44,11 @@ public class Player : MovingObject
 
     void OnTriggerEnter2D(Collider2D collider)
     {
+        Debug.Log(collider.tag);
+        if (collider.tag == "Dark Floor")
+            isInLightArea = false;
+        if (collider.tag == "Light Floor")
+            isInLightArea = true;
         if (collider.tag == "Food")
         {
             food += pointsPerFood;
@@ -46,7 +64,9 @@ public class Player : MovingObject
             Invoke("Restart", restartLevelDelay);
             enabled = false;
         }
-        Debug.Log(food);
+
+        UpdateBlood();
+        //Debug.Log(food);
     }
 
     void OnDisable()
@@ -96,15 +116,51 @@ public class Player : MovingObject
     {
         animator.SetTrigger("playerHit");
         food -= loss;
+        UpdateBlood();
         CheckIfGameOver();
         
     }
 
     private void CheckIfGameOver()
     {
-        if (food <= 0)
+        if (food <= 0 || san <= 0)
         {
             GameController.instance.GameOver();
         }
+    }
+
+    IEnumerator SanCheck() {
+        while (true) {
+            Debug.Log("san check");
+            if (isInLightArea)
+            {
+                if (san < GameController.instance.playerSanPoints)
+                    san++;
+            }else {
+                san--;
+                CheckIfGameOver();
+            }
+
+            UpdateSan();
+            yield return new WaitForSeconds(sanityUpdateTime);
+        }
+    }
+
+    void UpdateSan() {
+        float percetageSan;
+        percetageSan = Mathf.Round(((float)san / (float)GameController.instance.playerSanPoints) * 100.0f) / 100.0f;
+        float newX = uiEndPosition.x + percetageSan * totalUILength;
+        Vector3 newMaskPostion = new Vector3(newX, uiStartPosition.y, uiStartPosition.x);
+        sanMask.localPosition = newMaskPostion;
+        print("san: "+san);
+    }
+
+    void UpdateBlood() {
+
+        float percentageFood;
+        percentageFood = Mathf.Round(((float)food / (float)GameController.instance.playerFoodPoints) * 100.0f) / 100.0f;
+        float newX = uiEndPosition.x + percentageFood * totalUILength;
+        Vector3 newMaskPostion = new Vector3(newX, uiStartPosition.y, uiStartPosition.x);
+        bloodMask.localPosition = newMaskPostion;
     }
 }
