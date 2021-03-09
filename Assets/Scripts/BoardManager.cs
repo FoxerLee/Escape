@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class BoardManager : MonoBehaviour
@@ -25,6 +26,7 @@ public class BoardManager : MonoBehaviour
     public int columns = 0;
     public int seed = 2333;
     public GameObject[] floorTiles;
+    public GameObject lightFloor;
     public GameObject[] outerWalTiles;
     public GameObject exitTile;
 
@@ -34,10 +36,14 @@ public class BoardManager : MonoBehaviour
 
     Transform boardHolder;
     List<Vector3> gridPositions = new List<Vector3>();
+    Text seed_show;
+
     
     public void SetupScene(int level)
     {
         // TODO: Here we need to update "seed" variable based on player's input
+        seed_show = GameObject.Find("seed_show").GetComponent<Text>();
+        seed_show.text = "Seed: " + seed;
         Random.seed = seed + GameController.instance.level;
         BoardSetup();
         ExitSetup();
@@ -64,6 +70,9 @@ public class BoardManager : MonoBehaviour
                     // toInstantiate = outerWalTiles[(seed + x + y)%outerWalTiles.Length];
                     toInstantiate = outerWalTiles[Random.Range(0, outerWalTiles.Length)];
                 }
+                if (x == 0 && y == 0)
+                    toInstantiate = lightFloor;
+
                 GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity);
 
                 instance.transform.SetParent(boardHolder);

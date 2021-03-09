@@ -97,6 +97,14 @@ public class GameController : MonoBehaviour
         InitGame();
     }
 
+    public void SeedRestart()
+    {
+        levelTextAnimator.SetBool("show", true);
+        levelText.text = "Seed Restart" ;
+        levelImage.SetActive(true);
+        level = 0;
+    }
+
     public void GameOver()
     {
         levelTextAnimator.SetBool("show", true);
