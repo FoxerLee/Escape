@@ -144,6 +144,13 @@ public class Player : MovingObject
         
     }
 
+    public void SeedRestart() {
+        SoundManager.instance.musicSource.Stop();
+        GameController.instance.SeedRestart();
+        gameovered = true;
+        Invoke("Restart", restartDelay);
+    }
+
     private void CheckIfGameOver()
     {
         if (gameovered)
