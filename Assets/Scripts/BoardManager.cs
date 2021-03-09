@@ -37,6 +37,8 @@ public class BoardManager : MonoBehaviour
     
     public void SetupScene(int level)
     {
+        // TODO: Here we need to update "seed" variable based on player's input
+        Random.seed = seed + GameController.instance.level;
         BoardSetup();
         ExitSetup();
 
@@ -55,10 +57,12 @@ public class BoardManager : MonoBehaviour
         {
             for (int y = -1; y < rows + 1; y++)
             {
-                GameObject toInstantiate = floorTiles[(seed + x + y)%floorTiles.Length];
+                // GameObject toInstantiate = floorTiles[(seed + x + y)%floorTiles.Length];
+                GameObject toInstantiate = floorTiles[Random.Range(0, floorTiles.Length)];
                 if (x == -1 || y == -1 || x == columns || y == rows)
                 {
-                    toInstantiate = outerWalTiles[(seed + x + y)%outerWalTiles.Length];
+                    // toInstantiate = outerWalTiles[(seed + x + y)%outerWalTiles.Length];
+                    toInstantiate = outerWalTiles[Random.Range(0, outerWalTiles.Length)];
                 }
                 GameObject instance = Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity);
 

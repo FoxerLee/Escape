@@ -15,6 +15,15 @@ public class Player : MovingObject
     public Transform bloodMask;
     public Transform sanMask;
     public float restartLevelDelay = 1f;
+    public float restartDelay = 1.5f;
+
+    public AudioClip moveSound1;
+    public AudioClip moveSound2;
+    public AudioClip eatSound1;
+    public AudioClip eatSound2;
+    public AudioClip drinkSound1;
+    public AudioClip drinkSound2;
+    public AudioClip gameOverSound;
 
     Animator animator;
     bool isInLightArea = true;
@@ -35,16 +44,25 @@ public class Player : MovingObject
 
     protected override void AttempMove<T> (int xDir, int yDir)
     {
+        Debug.Log(food);
+        Debug.Log(GameController.instance.playerFoodPoints);
         food--;
         UpdateBlood();
         base.AttempMove<T>(xDir, yDir);
+
+        RaycastHit2D hit;
+        if (Move(xDir, yDir, out hit))
+        {
+            SoundManager.instance.RandomizeSfx(moveSound1, moveSound2);
+        }
+
         CheckIfGameOver();
         GameController.instance.playerTurn = false;
     }
 
     void OnTriggerEnter2D(Collider2D collider)
     {
-        Debug.Log(collider.tag);
+        // Debug.Log(collider.tag);
         if (collider.tag == "Dark Floor")
             isInLightArea = false;
         if (collider.tag == "Light Floor")
@@ -52,11 +70,13 @@ public class Player : MovingObject
         if (collider.tag == "Food")
         {
             food += pointsPerFood;
+            SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
             collider.gameObject.SetActive(false);
         }
         else if (collider.tag == "Soda")
         {
             food += pointsPerSoda;
+            SoundManager.instance.RandomizeSfx(drinkSound1, drinkSound2);
             collider.gameObject.SetActive(false);
         }
         else if (collider.tag == "Exit")
@@ -102,6 +122,8 @@ public class Player : MovingObject
 
     void Restart()
     {
+        // food = GameController.instance.playerFoodPoints;
+        // san = GameController.instance.playerSanPoints;
         SceneManager.LoadScene(0);
     }
 
@@ -125,13 +147,20 @@ public class Player : MovingObject
     {
         if (food <= 0 || san <= 0)
         {
+            SoundManager.instance.musicSource.Stop();
+            SoundManager.instance.PlaySingle(gameOverSound);
             GameController.instance.GameOver();
+
+            // GameController.instance.level = 1;
+            // GameController.instance.playerFoodPoints = 100;
+            // GameController.instance.playerSanPoints = 100;
+            Invoke("Restart",  restartDelay);
         }
     }
 
     IEnumerator SanCheck() {
         while (true) {
-            Debug.Log("san check");
+            // Debug.Log("san check");
             if (isInLightArea)
             {
                 if (san < GameController.instance.playerSanPoints)
@@ -148,17 +177,25 @@ public class Player : MovingObject
 
     void UpdateSan() {
         float percetageSan;
-        percetageSan = Mathf.Round(((float)san / (float)GameController.instance.playerSanPoints) * 100.0f) / 100.0f;
+        percetageSan = Mathf.Round(((float)san / (float)GameController.instance.playerWholeSanPoints) * 100.0f) / 100.0f;
+        if (percetageSan > 1.0f)
+        {
+            percetageSan = 1.0f;
+        }
         float newX = uiEndPosition.x + percetageSan * totalUILength;
         Vector3 newMaskPostion = new Vector3(newX, uiStartPosition.y, uiStartPosition.x);
         sanMask.localPosition = newMaskPostion;
-        print("san: "+san);
+        // print("san: "+san);
     }
 
     void UpdateBlood() {
 
         float percentageFood;
-        percentageFood = Mathf.Round(((float)food / (float)GameController.instance.playerFoodPoints) * 100.0f) / 100.0f;
+        percentageFood = Mathf.Round(((float)food / (float)GameController.instance.playerWholeFoodPoints) * 100.0f) / 100.0f;
+        if (percentageFood > 1.0f) 
+        {
+            percentageFood = 1.0f;
+        }
         float newX = uiEndPosition.x + percentageFood * totalUILength;
         Vector3 newMaskPostion = new Vector3(newX, uiStartPosition.y, uiStartPosition.x);
         bloodMask.localPosition = newMaskPostion;
