@@ -24,6 +24,7 @@ public class GameController : MonoBehaviour
     bool enemyMoving;
     bool doingSetup;
     GameObject levelImage;
+    Animator levelTextAnimator;
     Text levelText;
 
     void Awake()
@@ -41,15 +42,18 @@ public class GameController : MonoBehaviour
         
         enemies = new List<Enemy>();
         boardManager = GetComponent<BoardManager>();
+        
         InitGame();
     }
 
     void InitGame()
     {
         doingSetup = true;
-
         levelImage = GameObject.Find("LevelImage");
         levelText = GameObject.Find("LevelText").GetComponent<Text>();
+        levelTextAnimator = GameObject.Find("LevelText").GetComponent<Animator>();
+
+        levelTextAnimator.SetBool("show",true);
         levelText.text = "Day " + level;
         // levelText.SetActive(true);
         levelImage.SetActive(true);
@@ -62,6 +66,7 @@ public class GameController : MonoBehaviour
     private void HideLevelImage()
     {
         levelImage.SetActive(false);
+        levelTextAnimator.SetBool("show", false);
         // levelText.SetActive(false);
         doingSetup = false;
     }
@@ -83,15 +88,22 @@ public class GameController : MonoBehaviour
 
     private void LevelWasLoaded(Scene s, LoadSceneMode mode)
     {
+        if (level == 0) {
+            playerFoodPoints = playerWholeFoodPoints;
+            playerSanPoints = playerWholeSanPoints;
+        }
         level++;
+        Debug.Log("scene name: " + s.name + " level: " + level);
         InitGame();
     }
 
     public void GameOver()
     {
+        levelTextAnimator.SetBool("show", true);
         levelText.text = "You died after " + level + " days.";
         levelImage.SetActive(true);
-        enabled = false;
+        level = 0;
+        //enabled = false;
     }
 
 

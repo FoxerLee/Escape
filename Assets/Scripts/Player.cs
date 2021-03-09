@@ -30,6 +30,7 @@ public class Player : MovingObject
     float totalUILength;
     int food;
     int san;
+    bool gameovered = false;
 
     protected override void Start()
     {
@@ -44,8 +45,8 @@ public class Player : MovingObject
 
     protected override void AttempMove<T> (int xDir, int yDir)
     {
-        Debug.Log(food);
-        Debug.Log(GameController.instance.playerFoodPoints);
+        //Debug.Log(food);
+        //Debug.Log(GameController.instance.playerFoodPoints);
         food--;
         UpdateBlood();
         base.AttempMove<T>(xDir, yDir);
@@ -145,11 +146,14 @@ public class Player : MovingObject
 
     private void CheckIfGameOver()
     {
+        if (gameovered)
+            return;
         if (food <= 0 || san <= 0)
         {
             SoundManager.instance.musicSource.Stop();
             SoundManager.instance.PlaySingle(gameOverSound);
             GameController.instance.GameOver();
+            gameovered = true;
 
             // GameController.instance.level = 1;
             // GameController.instance.playerFoodPoints = 100;
