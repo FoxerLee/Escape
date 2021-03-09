@@ -126,6 +126,11 @@ public class Player : MovingObject
         // food = GameController.instance.playerFoodPoints;
         // san = GameController.instance.playerSanPoints;
         SceneManager.LoadScene(0);
+        if (gameovered)
+        {
+            SoundManager.instance.musicSource.Play();
+        }
+
     }
 
     protected override void OnCantMove<T> (T component)
